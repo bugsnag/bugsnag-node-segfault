@@ -2,7 +2,6 @@ var segfault = require('segfault');
 var fs = require('fs');
 
 function SEGFAULT(message, stack) {
-
     this.message = message;
     this.stack = stack;
 }
@@ -40,26 +39,38 @@ module.exports = function (bugsnag, options) {
                         return;
                     }
                 });
-                console.log("Read report: ");
 
-                var lines = report.split("\n");
-
-                var stack = lines[0];
-
-                for (var i = 1; i < lines.length; i++) {
-                    var match = lines[i].match(/([0-9]+)\s+([^\s]+)\s+(.+)/);
-                    if (match) {
-
-                        stack += "\n    at " + match[2] + " (" + match[3].replace(/\s/g, ".") + ":1:1)";
-                    } else if (lines[i]) {
-                        console.log("FAILED: " + lines[i]);
-                    }
-                }
-
-                bugsnag.notify(new SEGFAULT(lines[0], stack), {groupingHash: 'SIGSEGV'});
+                bugsnag.notify(module.exports.parseReport(report), {groupingHash: 'SIGSEGV'});
             });
         });
     });
+};
+
+module.exports.parseReport = function (report) {
+    var lines = report.split("\n");
+
+    var stack = lines[0];
+
+    for (var i = 1; i < lines.length; i++) {
+        var match = lines[i].match(/([0-9]+)\s+([^\s]+)\s+(.+)/);
+        if (match) {
+            stack += "\n    at " + match[3].replace(/\s/g, ".") + " (" + match[2].replace(/\s/g, ".") + ":1:1)";
+            continue;
+        }
+
+        match = lines[i].match(/([^(]+)\(([^\)]+)\)\[([^\]]+)\]$/);
+        if (match) {
+            stack += "\n    at " + match[2].replace(/\s/g, ".") + " (" + match[1].replace(/\s/g, ".") + ":1:1)";
+            continue;
+        }
+
+
+        if (lines[i]) {
+            console.log("FAILED: " + lines[i]);
+        }
+    }
+
+    return new SEGFAULT(lines[0], stack);
 };
 
 module.exports.test = function () {

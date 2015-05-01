@@ -1,15 +1,21 @@
 {
   "name": "bugsnag-segfault-handler",
   "description": "sends segfaults to Bugsnag",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "author": "Conrad Irwin <conrad@bugsnag.com>",
   "repository": "https://github.com/bugsnag/bugsnag-node-segfault",
-  "contributors": [ ],
+  "contributors": [],
   "dependencies": {
     "segfault": "^0.3.0"
   },
   "devDependencies": {
-    "bugsnag": "^1.6.2"
+    "bugsnag": "^1.6.2",
+    "chai": "^2.3.0",
+    "mocha": "^2.2.4",
+    "stack-trace": "0.0.9"
   },
-  "main": "index.js"
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test/index.js"
+  }
 }
